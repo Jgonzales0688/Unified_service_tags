@@ -1,10 +1,45 @@
-# simple-kubernetes-webhook
+# Admission Controller Project
 
-This is a simple [Kubernetes admission webhook](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/). It is meant to be used as a validating and mutating admission webhook only and does not support any controller logic. It has been developed as a simple Go web service without using any framework or boilerplate such as kubebuilder.
+## Introduction
 
-This project is aimed at illustrating how to build a fully functioning admission webhook in the simplest way possible. Most existing examples found on the web rely on heavy machinery using powerful frameworks, yet fail to illustrate how to implement a lightweight webhook that can do much needed actions such as rejecting a pod for compliance reasons, or inject helpful environment variables.
+For my summer project, I developed a Mutating Admission Controller implemented as a webhook. This project allowed me to gain valuable experience beyond my coursework and delve into the infrastructure side of software engineering.
 
-For readability, this project has been stripped of the usual production items such as: observability instrumentation, release scripts, redundant deployment configurations, etc. As such, it is not meant to use as-is in a production environment. This project is, in fact, a simplified fork of a system used accross all Kubernetes production environments at Slack.
+## Motivation
+
+I chose to work on this project because of the company's commitment to making a positive impact on the world. The company's values aligned with what I sought in a workplace, and I was excited to contribute to their mission.
+
+## About the Admission Controller
+
+An admission controller acts as a guard at the door of a Kubernetes cluster, ensuring that resources meet specific criteria before entering. Kubernetes orchestrates containerized applications within clusters, which are collections of nodes (servers) working together.
+
+I developed this admission controller to enhance the capabilities of a monitoring tool. 
+It assists in:
+- Identifying deployment impact with trace and container metrics filtered by version.
+- Seamlessly navigating traces, metrics, and logs using consistent tags.
+- Viewing service data based on environment or version uniformly.
+
+## How It Works
+
+I accomplished this by automating metadata addition through Kubernetes tags:
+- First tag: Specifies the environment of the workload deployment.
+- Second tag: Identifies the service name, showing the name of the deployed workload.
+- Third tag: Indicates the version of the deployed workload.
+
+## Non-Tech Example
+
+Think of an admission controller as a bouncer at a party. Just like bouncers check wristbands, the admission controller validates resources using tags. If a resource lacks the necessary tags, it goes through a mutation phase to have them added.
+
+## Technical Implementation
+
+I created a mutating admission controller from scratch in Go Lang. Prior to this project, I had no experience with Go Lang, Kubernetes, or Docker, making this a significant learning opportunity. I'm proud to have earned the title of an expert on admission controllers within our team.
+
+## Process Flow
+
+- The admission controller receives an API request when a resource is created.
+- The resource undergoes validation and is checked for required tags.
+- If tags are missing, the resource goes through the mutation phase to add them.
+- The resource is then subjected to object schema validation, ensuring proper structure.
+- Resources with valid tags are moved to Kubernetes data storage (ETCD).
 
 ## Installation
 This project can fully run locally and includes automation to deploy a local Kubernetes cluster (using Kind).
@@ -122,8 +157,8 @@ Deploy a valid test pod that gets succesfully created:
 ❯ make pod
 
 🚀 Deploying test pod...
-kubectl apply -f dev/manifests/pods/lifespan-seven.pod.yaml
-pod/lifespan-seven created
+kubectl apply -f dev/manifests/pods/good-pod.yaml
+pod/good-pod created
 ```
 You should see in the admission webhook logs that the pod got mutated and validated.
 
@@ -132,8 +167,8 @@ Deploy a non valid pod that gets rejected:
 ❯ make bad-pod
 
 🚀 Deploying "bad" pod...
-kubectl apply -f dev/manifests/pods/bad-name.pod.yaml
-Error from server: error when creating "dev/manifests/pods/bad-name.pod.yaml": admission webhook "simple-kubernetes-webhook.acme.com" denied the request: pod name contains "offensive"
+kubectl apply -f dev/manifests/pods/bad-pod.yaml
+Error from server: error when creating "dev/manifests/pods/bad-pod.yaml": admission webhook "simple-kubernetes-webhook.acme.com" denied the request: pod name contains "offensive"
 ```
 You should see in the admission webhook logs that the pod validation failed. It's possible you will also see that the pod was mutated, as webhook configurations are not ordered.
 
@@ -149,22 +184,10 @@ ok  	github.com/slackhq/simple-kubernetes-webhook/pkg/validation	0.749s
 ```
 
 ## Admission Logic
-A set of validations and mutations are implemented in an extensible framework. Those happen on the fly when a pod is deployed and no further resources are tracked and updated (ie. no controller logic).
-
-### Validating Webhooks
-#### Implemented
-- [name validation](pkg/validation/name_validator.go): validates that a pod name doesn't contain any offensive string
+A set of validations and mutations are implemented in an extensible framework. Those happen on the fly when a pod is deployed.
 
 #### How to add a new pod validation
 To add a new pod mutation, create a file `pkg/validation/MUTATION_NAME.go`, then create a new struct implementing the `validation.podValidator` interface.
 
-### Mutating Webhooks
-#### Implemented
-- [inject env](pkg/mutation/inject_env.go): inject environment variables into the pod such as `KUBE: true`
-- [minimum pod lifespan](pkg/mutation/minimum_lifespan.go): inject a set of tolerations used to match pods to nodes of a certain age, the tolerations injected are controlled via the `acme.com/lifespan-requested` pod label.
-
 #### How to add a new pod mutation
 To add a new pod mutation, create a file `pkg/mutation/MUTATION_NAME.go`, then create a new struct implementing the `mutation.podMutator` interface.
-
-
-
