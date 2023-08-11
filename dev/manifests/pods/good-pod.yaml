@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: good-pod
+  namespace: myteam-kondev1
+  labels:
+    "tags.datadoghq.com/env": kondev
+    "tags.datadoghq.com/service": busybox
+    "tags.datadoghq.com/version": latest
+spec:
+  containers:
+    - args:
+        - sleep
+        - "3600"
+      image: busybox:latest
+      name: lifespan-offensive
+  restartPolicy: Always

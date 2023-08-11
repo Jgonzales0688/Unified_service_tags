@@ -1,0 +1,43 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: "simple-kubernetes-webhook.acme.com"
+webhooks:
+  - name: "simple-kubernetes-webhook.acme.com"
+    namespaceSelector:
+      matchLabels:
+        admission-webhook: enabled
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+        scope: "*"
+    clientConfig:
+      service:
+        namespace: default
+        name: simple-kubernetes-webhook
+        path: /validate-pods
+        port: 443
+      caBundle: |
+        LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMzakNDQWNZQ0NRQ1A3L2lEWlIrUnNqQU5CZ2tx
+        aGtpRzl3MEJBUXNGQURBeE1Rc3dDUVlEVlFRR0V3SkIKVlRFaU1DQUdBMVVFQXd3WmMybHRjR3hsTFd0
+        MVltVnlibVYwWlhNdGQyVmlhRzl2YXpBZUZ3MHlNekEzTVRNeApOVEEzTlRWYUZ3MHlOREEzTVRJeE5U
+        QTNOVFZhTURFeEN6QUpCZ05WQkFZVEFrRlZNU0l3SUFZRFZRUUREQmx6CmFXMXdiR1V0YTNWaVpYSnVa
+        WFJsY3kxM1pXSm9iMjlyTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEEKTUlJQkNnS0NBUUVB
+        ckV1Yy9BTU4wdkZVUy9PdGpjQUNKMGxPRVBsWWFBeFhlUVNuemhKNVdIZUFwd2ZvQzJ2cwo3THBzSmNy
+        dktqckdwUmliWmlMd25TNCs0S21icURjRURrVW9mempSM1pzRFhQRWpacGVaaStqNlZ0TU5KMGFvCkh4
+        TVNVS0Y5dmNtMjEya0J2V29kbFVLQVNKQy9UaWQ1M3cvSVFXenkzcnNjQnZZMENOYXBkZWlGKzNuSStD
+        UTcKMXdhSGNUTDd2Tko0NGlZdjFHcjdXcy9NOTU0ZVdKbndJT1VJZW1mMmtLVVM0TnBpR21FdFdvMmFv
+        YmNXL2FKWQo3TVdpQ0NuTGc3SWdqc0lmWW15QjZNYzlXVEs4OG42aDk4dWZ1MVArdktSek91TTBKUFl6
+        QU9xdnRvcGFhbXYvClpKZUQ1V0tTTk8zakhlMllvaVp5Q0lGZmdoUWlCUkN6MHdJREFRQUJNQTBHQ1Nx
+        R1NJYjNEUUVCQ3dVQUE0SUIKQVFCK3VtcWNkRlNaVm5sa01MTzV2eXkwa3FVMml5TDdIbm0vREp3cENU
+        VnRkUUtobkJVd1BNRHpyWlh0dDREWgpoc2JHdE9HbFArSUQzK0QrazlnRGFaenVuWFlYSEZjaDVoaUJE
+        bWYyU3JyV1NyTDViYWg5WHBCdDVBQXdTUEFyClZOUTloZGx6RXQ4ZDBEVEUvYzMyL1NsTWEyUkJCU2kx
+        b1pURmt6eHo2dFdaKzM0N3VXSHAwWFU5RzRhY0gxZWoKZGoxdEVXSmRxZlVoMGh0S2lIWmxVeEZqUzk4
+        YW9QYW5ZQzRjUjRId3l6b1djTHBoSVJXTlp5OWZqcE5rY2dJYwp4aTIzVkhXNHgvRnBERldUTTllalBG
+        TTB2bm9yeTdPN3YyMW1Gc2lPajU5bG9xOTF2V3BCbHRtSW5YWDBYR0tKClMxM1ZwZm5OSHRhL2UvYTkw
+        SmVLbXNCOQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    timeoutSeconds: 2
